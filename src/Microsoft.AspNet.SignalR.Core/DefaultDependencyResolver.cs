@@ -83,6 +83,9 @@ namespace Microsoft.AspNet.SignalR
             var hubDescriptorProvider = new Lazy<ReflectedHubDescriptorProvider>(() => new ReflectedHubDescriptorProvider(this));
             Register(typeof(IHubDescriptorProvider), () => hubDescriptorProvider.Value);
 
+            var payloadDescriptorProvider = new Lazy<ReflectedPayloadDescriptorProvider>(() => new ReflectedPayloadDescriptorProvider(this));
+            Register(typeof(IPayloadDescriptorProvider), () => payloadDescriptorProvider.Value);
+
             var parameterBinder = new Lazy<DefaultParameterResolver>();
             Register(typeof(IParameterResolver), () => parameterBinder.Value);
 
@@ -94,6 +97,9 @@ namespace Microsoft.AspNet.SignalR
 
             var proxyGenerator = new Lazy<DefaultJavaScriptProxyGenerator>(() => new DefaultJavaScriptProxyGenerator(this));
             Register(typeof(IJavaScriptProxyGenerator), () => proxyGenerator.Value);
+
+            var contractGenerator = new Lazy<DefaultContractsGenerator>(() => new DefaultContractsGenerator(this));
+            Register(typeof(IContractsGenerator), () => contractGenerator.Value);
 
             var requestParser = new Lazy<HubRequestParser>();
             Register(typeof(IHubRequestParser), () => requestParser.Value);

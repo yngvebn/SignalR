@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.md in the project root for license information.
+﻿﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.md in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -156,11 +156,17 @@ namespace Microsoft.AspNet.SignalR.Hubs
             // Resolve the method
             MethodDescriptor methodDescriptor = _manager.GetHubMethod(descriptor.Name, hubRequest.Method, parameterValues);
 
+            // Resolving the actual state object
+            var tracker = new StateChangeTracker(hubRequest.State);
+            var hub = CreateHub(request, descriptor, connectionId, tracker, throwIfFailedToCreate: true);
+
             if (methodDescriptor == null)
             {
                 _counters.ErrorsHubInvocationTotal.Increment();
                 _counters.ErrorsHubInvocationPerSec.Increment();
-
+                return hub.OnMethodMissing(hubRequest.Method, parameterValues).
+                    ContinueWith(task => hub.Dispose(), TaskContinuationOptions.ExecuteSynchronously);
+                /*
                 // Empty (noop) method descriptor
                 // Use: Forces the hub pipeline module to throw an error.  This error is encapsulated in the HubDispatcher.
                 //      Encapsulating it in the HubDispatcher prevents the error from bubbling up to the transport level.
@@ -168,21 +174,27 @@ namespace Microsoft.AspNet.SignalR.Hubs
                 //      transport to unintentionally fail.
                 methodDescriptor = new MethodDescriptor
                 {
+                    
+                    Invoker = (hub, parameters) =>
+                    {
+                        throw new Exception();
+                    },
+                    
                     Invoker = (emptyHub, emptyParameters) =>
                     {
                         throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, Resources.Error_MethodCouldNotBeResolved, hubRequest.Method));
                     },
                     Attributes = new List<Attribute>(),
-                    Parameters = new List<ParameterDescriptor>()
-                };
+                    Parameters = new List<ParameterDescriptor>() 
+                };*/
             }
 
-            // Resolving the actual state object
-            var tracker = new StateChangeTracker(hubRequest.State);
-            var hub = CreateHub(request, descriptor, connectionId, tracker, throwIfFailedToCreate: true);
-
-            return InvokeHubPipeline(hub, parameterValues, methodDescriptor, hubRequest, tracker)
-                .ContinueWith(task => hub.Dispose(), TaskContinuationOptions.ExecuteSynchronously);
+            else
+            {
+                return InvokeHubPipeline(hub, parameterValues, methodDescriptor, hubRequest, tracker)
+                    .ContinueWith(task => hub.OnMethodExecuted(hubRequest.Method, parameterValues), TaskContinuationOptions.ExecuteSynchronously)
+                 .ContinueWith(task => hub.Dispose(), TaskContinuationOptions.ExecuteSynchronously);
+            }
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exceptions are flown to the caller.")]

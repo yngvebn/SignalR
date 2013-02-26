@@ -1856,7 +1856,7 @@
             if (!$.isEmptyObject(self.state)) {
                 data.S = self.state;
             }
-            
+
             self.connection.send(window.JSON.stringify(data));
 
             return d.promise();
@@ -1944,14 +1944,17 @@
                 // Trigger the local invocation event
                 proxy = this.proxies[hubName];
 
-                
-                if (!(proxy._.callbackMap[" 'hello' "])) {
-                    $(proxy).triggerHandler(makeEventName("onMethodNotFound"));
+
+                if (!(proxy._.callbackMap[eventName])) {
+                    $(proxy).triggerHandler(makeEventName("methodnotfound"), [data.Args]);
                 }
-                
-                // Update the hub state
-                $.extend(proxy.state, data.State);
-                $(proxy).triggerHandler(makeEventName(eventName), [data.Args]);
+
+                else {
+                    // Update the hub state
+                    $.extend(proxy.state, data.State);
+                    $(proxy).triggerHandler(makeEventName(eventName), [data.Args]);
+                    $(proxy).triggerHandler(makeEventName("methodexecuted"), [data.Args]);
+                }
             }
         });
     };

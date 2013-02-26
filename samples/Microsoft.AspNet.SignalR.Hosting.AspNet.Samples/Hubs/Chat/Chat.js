@@ -35,8 +35,12 @@ $(function () {
         return e;
     }
 
-    chat.client.onMethodNotFound = function () {
-        window.alert("Method Not Found");
+    chat.client.methodNotFound = function (eventName) {
+        window.alert('Method ' + eventName + 'not found');
+    };
+    
+    chat.client.methodExecuted = function (eventName) {
+        window.alert('Method ' + eventName + 'executed');
     };
 
     chat.client.refreshRoom = function (room) {

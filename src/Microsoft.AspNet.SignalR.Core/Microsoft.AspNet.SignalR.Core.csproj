@@ -55,8 +55,14 @@
     <Compile Include="..\Microsoft.AspNet.SignalR.Client\Infrastructure\StreamExtensions.cs">
       <Link>Infrastructure\StreamExtensions.cs</Link>
     </Compile>
+    <Compile Include="Compression\ContractedClientHubInvocation.cs" />
     <Compile Include="Configuration\ConfigurationExtensions.cs" />
     <Compile Include="ConnectionConfiguration.cs" />
+    <Compile Include="Compression\DefaultContractsGenerator.cs" />
+    <Compile Include="Compression\IContractsGenerator.cs" />
+    <Compile Include="Compression\IPayloadCompressor.cs" />
+    <Compile Include="Compression\IPayloadDescriptorProvider.cs" />
+    <Compile Include="Compression\PayloadAttribute.cs" />
     <Compile Include="HubConfiguration.cs" />
     <Compile Include="Hubs\ConnectionIdProxy.cs" />
     <Compile Include="Hubs\DynamicDictionary.cs" />
@@ -187,6 +193,11 @@
     <Compile Include="Hubs\HubNameAttribute.cs" />
     <Compile Include="Hubs\IHub.cs" />
     <Compile Include="Json\IJsonSerializer.cs" />
+    <Compile Include="Compression\PayloadCompressionModule.cs" />
+    <Compile Include="Compression\DefaultPayloadCompressor.cs" />
+    <Compile Include="Compression\PayloadDescriptor.cs" />
+    <Compile Include="Compression\DataDescriptor.cs" />
+    <Compile Include="Compression\ReflectedPayloadDescriptorProvider.cs" />
     <Compile Include="Tracing\ITraceManager.cs" />
     <Compile Include="DependencyResolverExtensions.cs" />
     <Compile Include="Hubs\ReflectionHelper.cs" />
@@ -260,6 +271,7 @@
   <Import Project="$(SolutionDir).nuget\NuGet.targets" Condition="HasTrailingSlash('$(SolutionDir)')" />
   <Target Name="AfterBuild">
   </Target>
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

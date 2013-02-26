@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.SignalR.Hubs
         public ClientHubInvocation Invocation
         {
             get;
-            private set;
+            set;
         }
 
         public string Signal

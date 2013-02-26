@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNet.SignalR.Compression;
 using Microsoft.AspNet.SignalR.Configuration;
 using Microsoft.AspNet.SignalR.Hosting;
 using Microsoft.AspNet.SignalR.Infrastructure;
@@ -54,6 +55,7 @@ namespace Microsoft.AspNet.SignalR
             Counters = resolver.Resolve<IPerformanceCounterManager>();
             AckHandler = resolver.Resolve<IAckHandler>();
             ProtectedData = resolver.Resolve<IProtectedData>();
+            ContractsGenerator = resolver.Resolve<IContractsGenerator>();
 
             _configurationManager = resolver.Resolve<IConfigurationManager>();
             _transportManager = resolver.Resolve<ITransportManager>();
@@ -74,6 +76,8 @@ namespace Microsoft.AspNet.SignalR
                 return TraceManager["SignalR.PersistentConnection"];
             }
         }
+
+        protected IContractsGenerator ContractsGenerator { get; private set; }
 
         protected IProtectedData ProtectedData { get; private set; }
 
@@ -439,6 +443,7 @@ namespace Microsoft.AspNet.SignalR
                 DisconnectTimeout = _configurationManager.DisconnectTimeout.TotalSeconds,
                 TryWebSockets = _transportManager.SupportsTransport(WebSocketsTransportName) && context.SupportsWebSockets(),
                 WebSocketServerUrl = context.WebSocketServerUrl(),
+                Contracts = ContractsGenerator.GenerateContracts(),
                 ProtocolVersion = "1.2"
             };
 

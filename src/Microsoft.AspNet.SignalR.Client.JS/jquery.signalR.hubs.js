@@ -252,6 +252,11 @@
                 // Trigger the local invocation event
                 proxy = this.proxies[hubName];
 
+                
+                if (!(proxy._.callbackMap[" 'hello' "])) {
+                    $(proxy).triggerHandler(makeEventName("onMethodNotFound"));
+                }
+                
                 // Update the hub state
                 $.extend(proxy.state, data.State);
                 $(proxy).triggerHandler(makeEventName(eventName), [data.Args]);

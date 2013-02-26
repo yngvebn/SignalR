@@ -39,6 +39,7 @@
             onReconnect: "onReconnect",
             onStateChanged: "onStateChanged",
             onDisconnect: "onDisconnect"
+            //onMethodNotFound: "onMethodNotFound"
         },
 
         log = function (msg, logging) {
@@ -342,6 +343,11 @@
                 deferred.resolve(connection);
             });
 
+            /*
+            $(connection).bind(events.onMethodNotFound, function () {
+                window.alert("Method not found");
+            }); */
+
             initialize = function (transports, index) {
                 index = index || 0;
                 if (index >= transports.length) {
@@ -518,6 +524,15 @@
             });
             return connection;
         },
+
+        /*
+        methodNotFound: function (callback) {
+            var connection = this;
+            $(connection).bind(events.onMethodNotFound, function (e, data) {
+                callback.call(connection, data);
+            });
+            return connection;            
+        },*/
 
         stateChanged: function (callback) {
             /// <summary>Adds a callback that will be invoked when the connection state changes</summary>
@@ -1929,6 +1944,11 @@
                 // Trigger the local invocation event
                 proxy = this.proxies[hubName];
 
+                
+                if (!(proxy._.callbackMap[" 'hello' "])) {
+                    $(proxy).triggerHandler(makeEventName("onMethodNotFound"));
+                }
+                
                 // Update the hub state
                 $.extend(proxy.state, data.State);
                 $(proxy).triggerHandler(makeEventName(eventName), [data.Args]);

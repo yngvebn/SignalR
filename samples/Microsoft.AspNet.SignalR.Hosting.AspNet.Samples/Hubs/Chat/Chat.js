@@ -8,7 +8,7 @@ $(function () {
     function clearMessages() {
         $('#messages').html('');
     }
-
+    
     function refreshMessages() { refreshList($('#messages')); }
 
     function clearUsers() {
@@ -34,6 +34,10 @@ $(function () {
         e[0].scrollIntoView();
         return e;
     }
+
+    chat.client.onMethodNotFound = function () {
+        window.alert("Method Not Found");
+    };
 
     chat.client.refreshRoom = function (room) {
         clearMessages();

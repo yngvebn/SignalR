@@ -440,7 +440,7 @@
                         return;
                     }
 
-                    $(connection).triggerHandler(events.onStarting);
+                    $(connection).triggerHandler(events.onStarting, [res]);
 
                     var transports = [],
                         supportedTransports = [];
@@ -481,7 +481,7 @@
             /// <returns type="signalR" />
             var connection = this;
             $(connection).bind(events.onStarting, function (e, data) {
-                callback.call(connection);
+                callback.call(connection, data);
             });
             return connection;
         },

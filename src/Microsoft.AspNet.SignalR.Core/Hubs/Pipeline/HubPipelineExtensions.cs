@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.md in the project root for license information.
 
 using System;
+using Microsoft.AspNet.SignalR.Compression;
 using Microsoft.AspNet.SignalR.Hubs;
+using Microsoft.AspNet.SignalR.Infrastructure;
 
 namespace Microsoft.AspNet.SignalR
 {
@@ -23,6 +25,16 @@ namespace Microsoft.AspNet.SignalR
 
             var authorizer = new AuthorizeAttribute();
             pipeline.AddModule(new AuthorizeModule(globalConnectionAuthorizer: authorizer, globalInvocationAuthorizer: authorizer));
+        }
+
+        public static void CompressPayloads(this IHubPipeline pipeline)
+        {
+            if (pipeline == null)
+            {
+                throw new ArgumentNullException("pipeline");
+            }
+
+            pipeline.AddModule(new PayloadCompressionModule(GlobalHost.DependencyResolver.Resolve<IPayloadCompressor>(), GlobalHost.DependencyResolver.Resolve<IPayloadDescriptorProvider>()));
         }
     }
 }

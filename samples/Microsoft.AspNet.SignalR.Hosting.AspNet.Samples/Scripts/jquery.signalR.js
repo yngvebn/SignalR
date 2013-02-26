@@ -39,7 +39,6 @@
             onReconnect: "onReconnect",
             onStateChanged: "onStateChanged",
             onDisconnect: "onDisconnect"
-            //onMethodNotFound: "onMethodNotFound"
         },
 
         log = function (msg, logging) {
@@ -1944,16 +1943,15 @@
                 // Trigger the local invocation event
                 proxy = this.proxies[hubName];
 
-
                 if (!(proxy._.callbackMap[eventName])) {
-                    $(proxy).triggerHandler(makeEventName("methodnotfound"), [data.Args]);
+                    $(proxy).triggerHandler(makeEventName("methodnotfound"), [[eventName]]);
                 }
 
                 else {
                     // Update the hub state
                     $.extend(proxy.state, data.State);
                     $(proxy).triggerHandler(makeEventName(eventName), [data.Args]);
-                    $(proxy).triggerHandler(makeEventName("methodexecuted"), [data.Args]);
+                    $(proxy).triggerHandler(makeEventName("methodexecuted"), [[eventName]]);
                 }
             }
         });

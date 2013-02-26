@@ -38,7 +38,6 @@
             onReconnect: "onReconnect",
             onStateChanged: "onStateChanged",
             onDisconnect: "onDisconnect"
-            //onMethodNotFound: "onMethodNotFound"
         },
 
         log = function (msg, logging) {

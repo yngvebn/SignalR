@@ -42,6 +42,42 @@ namespace Microsoft.AspNet.SignalR.Client.Hubs
         /// <param name="eventName">The name of the event.</param>
         /// <param name="onData">The callback</param>
         /// <returns>An <see cref="IDisposable"/> that represents this subscription.</returns>
+        public static IDisposable OnX<T>(this IHubProxy proxy, string eventName, Action<T> onData)
+        {
+            if (proxy == null)
+            {
+                throw new ArgumentNullException("proxy");
+            }
+
+            if (String.IsNullOrEmpty(eventName))
+            {
+                throw new ArgumentNullException("eventName");
+            }
+
+            if (onData == null)
+            {
+                throw new ArgumentNullException("onData");
+            }
+
+            Subscription subscription = proxy.Subscribe(eventName);
+
+            Action<IList<JToken>, string> handler = (args, methodName) =>
+            {
+                onData(Convert<T>(methodName));
+            };
+
+            subscription.ReceivedX += handler;
+
+            return new DisposableAction(() => subscription.ReceivedX -= handler);
+        }
+
+        /// <summary>
+        /// Registers for an event with the specified name and callback
+        /// </summary>
+        /// <param name="proxy">The <see cref="IHubProxy"/>.</param>
+        /// <param name="eventName">The name of the event.</param>
+        /// <param name="onData">The callback</param>
+        /// <returns>An <see cref="IDisposable"/> that represents this subscription.</returns>
         public static IDisposable On(this IHubProxy proxy, string eventName, Action onData)
         {
             if (proxy == null)

@@ -167,12 +167,12 @@ namespace Microsoft.AspNet.SignalR.Client.Hubs
 
                 if (_subscriptions.TryGetValue("*", out subscription))
                 {
-                    subscription.OnReceived(args);
+                    subscription.OnReceived(args, eventName);
                 }
             }
             else if (_subscriptions.TryGetValue("!", out subscription))
             {
-                subscription.OnReceived(args);
+                subscription.OnReceived(args, eventName);
             }
         }
     }

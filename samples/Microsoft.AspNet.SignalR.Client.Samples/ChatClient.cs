@@ -21,9 +21,9 @@ namespace Microsoft.AspNet.SignalR.Client.Samples
 
             chatHub.On("broadcastMessage", message => Console.WriteLine(message));
 
-            chatHub.On("!", args => Console.WriteLine(String.Format("Method not found on the client")));
+            chatHub.OnX<string>("!", methodName => Console.WriteLine(String.Format("Method {0} not found on the client", methodName)));
 
-            chatHub.On("*", args => Console.WriteLine(String.Format("Method was just executed on the client")));
+            chatHub.OnX<string>("*", methodName => Console.WriteLine(String.Format("Method {0} was just executed on the client", methodName)));
 
             connection.Start().Wait();
 

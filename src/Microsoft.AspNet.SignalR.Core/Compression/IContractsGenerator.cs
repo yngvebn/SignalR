@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Microsoft.AspNet.SignalR.Infrastructure
+namespace Microsoft.AspNet.SignalR.Compression
 {
     public interface IContractsGenerator
     {

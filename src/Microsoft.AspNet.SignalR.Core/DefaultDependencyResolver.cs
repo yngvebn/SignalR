@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using Microsoft.AspNet.SignalR.Compression;
 using Microsoft.AspNet.SignalR.Configuration;
 using Microsoft.AspNet.SignalR.Hubs;
 using Microsoft.AspNet.SignalR.Infrastructure;
@@ -85,6 +86,9 @@ namespace Microsoft.AspNet.SignalR
 
             var payloadDescriptorProvider = new Lazy<ReflectedPayloadDescriptorProvider>(() => new ReflectedPayloadDescriptorProvider(this));
             Register(typeof(IPayloadDescriptorProvider), () => payloadDescriptorProvider.Value);
+
+            var payloadCompressor = new Lazy<DefaultPayloadCompressor>(() => new DefaultPayloadCompressor(this));
+            Register(typeof(IPayloadCompressor), () => payloadCompressor.Value);
 
             var parameterBinder = new Lazy<DefaultParameterResolver>();
             Register(typeof(IParameterResolver), () => parameterBinder.Value);

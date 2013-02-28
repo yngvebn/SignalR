@@ -742,12 +742,6 @@
             return deferral.promise();
         },
 
-        decompressPayload: function (payload, connection) {
-            //var contracts = connection._.contracts;
-
-            return payload;
-        },
-
         addQs: function (url, connection) {
             var appender = url.indexOf("?") !== -1 ? "&" : "?",
                 firstChar;
@@ -872,9 +866,7 @@
         },
 
         processMessages: function (connection, minData) {
-            var data,
-                that = this;
-
+            var data;
             // Transport can be null if we've just closed the connection
             if (connection.transport) {
                 var $connection = $(connection);
@@ -889,7 +881,7 @@
                     return;
                 }
 
-                data = that.maximizePersistentResponse(minData);
+                data = this.maximizePersistentResponse(minData);
 
                 if (data.Disconnect) {
                     connection.log("Disconnect command received from server");
@@ -903,7 +895,7 @@
 
                 if (data.Messages) {
                     $.each(data.Messages, function () {
-                        $connection.triggerHandler(events.onReceived, [that.decompressPayload(this, connection)]);
+                        $connection.triggerHandler(events.onReceived, [this]);
                     });
                 }
 
@@ -2020,9 +2012,9 @@
         savedReceived = signalR.prototype.received,
         savedCreateHubProxy = hubConnection.prototype.createHubProxy,
         getContractFromResponse = function (hubName, methodName, contracts) {
-            var contractId = contracts[0][hubName][methodName];
+            var contractInfo = contracts[0][hubName][methodName];
 
-            return getContract(contractId, contracts);
+            return [getContract(contractInfo[0], contracts), contractInfo[1]];
         },
         buildResult = function (hubName, methodName, decompress) {
             return {
@@ -2032,7 +2024,7 @@
             };
         },
         getContract = function (contractId, contracts) {
-            return contracts[1][contractId];
+            return contracts[2][contractId];
         },
         isPayload = function (contractId, contracts) {
             return !!getContract(contractId, contracts);
@@ -2045,12 +2037,24 @@
 
                 $.each(contract, function (i, val) {
                     var propertyName = val[0],
-                        compressedTypeId = val[1];
+                        compressedTypeId = val[1][0],
+                        enumerable = val[1][1],
+                        enumerated;
 
-
-                    // Check the payload type of the parameter, we need to recursively 
+                    // Check the payload type of the parameter, if it's a payload we need to recursively decompress it
                     if (isPayload(compressedTypeId, contracts)) {
-                        result[propertyName] = decompress(compressed[i], getContract(compressedTypeId, contracts), contracts);
+                        if (enumerable) {
+                            enumerated = [];
+                            
+                            for (var j = 0; j < compressed[i].length; j++) {
+                                enumerated[j] = decompress(compressed[i][j], getContract(compressedTypeId, contracts), contracts);
+                            }
+                            
+                            result[propertyName] = enumerated;
+                        }
+                        else {
+                            result[propertyName] = decompress(compressed[i], getContract(compressedTypeId, contracts), contracts);
+                        }
                     }
                     else {
                         result[propertyName] = compressed[i];
@@ -2059,12 +2063,47 @@
             }
 
             return result;
+        },
+        compress = function (uncompressed, contract, contracts) {
+            var result,
+                enumerated;
+
+            if (uncompressed) {
+                result = [];
+
+                $.each(contract, function (i, val) {
+                    var propertyName = val[0],
+                        compressedTypeId = val[1][0],
+                        enumerable = val[1][1];
+
+                    // Check the payload type of the parameter, if it's a payload we need to recursively compress it
+                    if (isPayload(compressedTypeId, contracts)) {
+                        if (enumerable) {
+                            enumerated = [];
+
+                            for (var j = 0; j < uncompressed[propertyName].length; j++) {
+                                enumerated[j] = compress(uncompressed[propertyName][j], getContract(compressedTypeId, contracts), contracts);
+                            }
+
+                            result[propertyName].push(enumerated);
+                        }
+                        else {
+                            result.push(compress(uncompressed[propertyName], getContract(compressedTypeId, contracts), contracts));
+                        }
+                    }
+                    else {
+                        result.push(uncompressed[propertyName] || null);
+                    }
+                });
+            }
+
+            return result || null;
         };
 
     $.signalR.fn.init = function () {
         var connection = this,
             compressionData = {
-                decompressResult: [], // Array of booleans representing if we should decompress an invocation result,
+                decompressResult: [], // Array of Booleans representing if we should decompress an invocation result,
                 contracts: {} // Contracts to abide by when sending/receiving data
             };
 
@@ -2086,7 +2125,9 @@
             compressionData = connection._.compressionData,
             contracts = compressionData.contracts,
             data,
-            contract;
+            contract,
+            enumerable,
+            result;
 
             // Verify this is a return value
             if (typeof (minData.I) !== "undefined" && minData.R) {
@@ -2097,20 +2138,51 @@
                 if (data.decompress) {
                     // Pull the contract for the given method
                     contract = getContractFromResponse(data.hubName, data.methodName, contracts);
+                    enumerable = contract[1];
+                    contract = contract[0];
 
-                    minData.R = decompress(minData.R, contract, contracts);
+                    if (enumerable === false) {
+                        result = decompress(minData.R, contract, contracts);
+                    }
+                    else {
+                        result = [];
+                        $.each(minData.R, function (i, val) {
+                            result.push(decompress(val, contract, contracts));
+                        });
+                    }
+
+                    minData.R = result;
                 }
             }
-            else if(typeof(minData.A) !== "undefined") {
+            else if (typeof (minData.A) !== "undefined") {
                 $.each(minData.A, function (i, arg) {
                     var contractId = minData.C[i],
-                        contract;
+                        contract,
+                        enumerable = false;
+
+                    // Checking if the contract that's sent down is an array of contractables
+                    if (contractId.length > 2 && contractId.substring(contractId.length - 2) === "[]") {
+                        contractId = contractId.substring(0, contractId.length - 2);
+                        enumerable = true;
+                    }
+
+                    contractId = parseInt(contractId, 10);
 
                     // Verify there's a valid contract
                     if (isPayload(contractId, contracts)) {
                         contract = getContract(contractId, contracts);
 
-                        minData.A[i] = decompress(arg, contract, contracts);
+                        if (enumerable === false) {
+                            result = decompress(arg, contract, contracts);
+                        }
+                        else {
+                            result = [];
+                            $.each(arg, function (i, val) {
+                                result.push(decompress(val, contract, contracts));
+                            });
+                        }
+
+                        minData.A[i] = result;
                     }
                 });
             }
@@ -2128,16 +2200,51 @@
             compressionData = connection._.compressionData;
 
         proxy.invoke = function (methodName) {
-            var contracts = compressionData.contracts[0][hubName];
+            var contracts = compressionData.contracts,
+                returnContracts = contracts[0][hubName],
+                invokeContracts = contracts[1][hubName],
+                invokeContractData,
+                contractId,
+                contract,
+                enumerable,
+                enumerated,
+                methodArgs = $.makeArray(arguments);
 
-            if (contracts && contracts[methodName]) {
+            // Check if we need to return a result
+            if (returnContracts && returnContracts[methodName]) {
                 compressionData.decompressResult.push(buildResult(hubName, methodName, true));
             }
             else {
                 compressionData.decompressResult.push(buildResult(hubName, methodName, false));
             }
 
-            return savedInvoke.apply(this, arguments);
+            if (invokeContracts && invokeContracts[methodName]) {
+                invokeContractData = invokeContracts[methodName];
+
+                for (var i = 1; i < methodArgs.length; i++) {
+                    contractId = invokeContractData[i - 1][0];
+                    enumerable = invokeContractData[i - 1][1];                    
+
+                    if (isPayload(contractId, contracts)) {
+                        contract = getContract(contractId, contracts);
+
+                        if (enumerable) {
+                            enumerated = [];
+
+                            for(var j = 0;j<methodArgs[i].length;j++) {
+                                enumerated.push(compress(methodArgs[i][j], contract, contracts));
+                            }
+
+                            methodArgs[i] = enumerated;
+                        }
+                        else {
+                            methodArgs[i] = compress(methodArgs[i], contract, contracts);
+                        }
+                    }
+                }
+            }
+
+            return savedInvoke.apply(this, methodArgs);
         };
 
         return proxy;

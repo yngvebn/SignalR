@@ -19,9 +19,9 @@ namespace Microsoft.AspNet.SignalR.Compression
         }
 
         /// <summary>
-        /// A klist of contract Ids, it's a 1-to-1 map to args
+        /// A list of contract Ids, it's a 1-to-1 map to args
         /// </summary>
         [JsonProperty("C")]
-        public long[] ContractIds { get; set; }
+        public string[] ContractIds { get; set; }
     }
 }

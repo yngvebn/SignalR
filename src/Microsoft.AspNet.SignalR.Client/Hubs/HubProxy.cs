@@ -16,6 +16,9 @@ namespace Microsoft.AspNet.SignalR.Client.Hubs
         private readonly Dictionary<string, JToken> _state = new Dictionary<string, JToken>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Subscription> _subscriptions = new Dictionary<string, Subscription>(StringComparer.OrdinalIgnoreCase);
 
+        // public readonly SubscriptionDefault _subscriptionAny = new SubscriptionDefault();
+        // public readonly SubscriptionDefault _subscriptionMethodMissing = new SubscriptionDefault();
+
         public HubProxy(IHubConnection connection, string hubName)
         {
             _connection = connection;
@@ -164,7 +167,6 @@ namespace Microsoft.AspNet.SignalR.Client.Hubs
             if (_subscriptions.TryGetValue(eventName, out subscription))
             {
                 subscription.OnReceived(args);
-
                 if (_subscriptions.TryGetValue("*", out subscription))
                 {
                     subscription.OnReceived(args, eventName);

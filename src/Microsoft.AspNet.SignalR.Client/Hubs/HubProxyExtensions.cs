@@ -36,22 +36,16 @@ namespace Microsoft.AspNet.SignalR.Client.Hubs
         }
 
         /// <summary>
-        /// Registers for an event with the specified name and callback
+        /// Registers for an event that is called after execution of every method
         /// </summary>
         /// <param name="proxy">The <see cref="IHubProxy"/>.</param>
-        /// <param name="eventName">The name of the event.</param>
         /// <param name="onData">The callback</param>
         /// <returns>An <see cref="IDisposable"/> that represents this subscription.</returns>
-        public static IDisposable OnX<T>(this IHubProxy proxy, string eventName, Action<T> onData)
+        public static IDisposable OnAny<T>(this IHubProxy proxy, Action<T> onData)
         {
             if (proxy == null)
             {
                 throw new ArgumentNullException("proxy");
-            }
-
-            if (String.IsNullOrEmpty(eventName))
-            {
-                throw new ArgumentNullException("eventName");
             }
 
             if (onData == null)
@@ -59,16 +53,48 @@ namespace Microsoft.AspNet.SignalR.Client.Hubs
                 throw new ArgumentNullException("onData");
             }
 
-            Subscription subscription = proxy.Subscribe(eventName);
+            Subscription subscription = proxy.Subscribe("*");
 
             Action<IList<JToken>, string> handler = (args, methodName) =>
             {
                 onData(Convert<T>(methodName));
             };
 
-            subscription.ReceivedX += handler;
+            subscription.ReceivedDefault += handler;
+            // proxy._subscriptionAny.Received += handler;
 
-            return new DisposableAction(() => subscription.ReceivedX -= handler);
+            return new DisposableAction(() => subscription.ReceivedDefault -= handler);
+        }
+
+        /// <summary>
+        /// Registers for an event that is called when a method not defined on the client is called
+        /// </summary>
+        /// <param name="proxy">The <see cref="IHubProxy"/>.</param>
+        /// <param name="onData">The callback</param>
+        /// <returns>An <see cref="IDisposable"/> that represents this subscription.</returns>
+        public static IDisposable OnMissing<string>(this IHubProxy proxy, Action<string> onData)
+        {
+            if (proxy == null)
+            {
+                throw new ArgumentNullException("proxy");
+            }
+
+            if (onData == null)
+            {
+                throw new ArgumentNullException("onData");
+            }
+
+            Subscription subscription = proxy.Subscribe("!");
+
+            Action<IList<JToken>, string> handler = (args, methodName) =>
+            {
+                onData(Convert<string>(methodName));
+            };
+
+            subscription.ReceivedDefault += handler;
+            // proxy._subscriptionMethodMissing.Received += handler;
+
+            return new DisposableAction(() => subscription.ReceivedDefault -= handler);
         }
 
         /// <summary>

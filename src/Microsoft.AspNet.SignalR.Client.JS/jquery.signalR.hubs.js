@@ -253,14 +253,14 @@
                 proxy = this.proxies[hubName];
 
                 if (!(proxy._.callbackMap[eventName])) {
-                    $(proxy).triggerHandler(makeEventName("methodnotfound"), [[eventName]]);
+                    $(proxy).triggerHandler(makeEventName("methodmissing"), [[eventName]]);
                 }
 
                 else {
                     // Update the hub state
                     $.extend(proxy.state, data.State);
                     $(proxy).triggerHandler(makeEventName(eventName), [data.Args]);
-                    $(proxy).triggerHandler(makeEventName("methodexecuted"), [[eventName]]);
+                    $(proxy).triggerHandler(makeEventName("methodany"), [[eventName]]);
                 }
             }
         });

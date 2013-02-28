@@ -12,7 +12,7 @@ namespace Microsoft.AspNet.SignalR.Client.Hubs
     public class Subscription
     {
         public event Action<IList<JToken>> Received;
-        public event Action<IList<JToken>, string> ReceivedX;
+        public event Action<IList<JToken>, string> ReceivedDefault;
 
         internal void OnReceived(IList<JToken> data)
         {
@@ -24,9 +24,9 @@ namespace Microsoft.AspNet.SignalR.Client.Hubs
 
         internal void OnReceived(IList<JToken> data, string methodName)
         {
-            if (ReceivedX != null)
+            if (ReceivedDefault != null)
             {
-                ReceivedX(data, methodName);
+                ReceivedDefault(data, methodName);
             }
         }
     }

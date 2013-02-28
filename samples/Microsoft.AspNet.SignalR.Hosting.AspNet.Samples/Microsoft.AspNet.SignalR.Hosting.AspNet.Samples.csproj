@@ -145,6 +145,7 @@
     <Content Include="Hubs\Chat\mobile.htm" />
     <Content Include="Hubs\ConnectDisconnect\Default.aspx" />
     <Content Include="Hubs\ConnectDisconnect\Status.js" />
+    <Content Include="Hubs\DemoHub\ChatPage.html" />
     <Content Include="Hubs\DemoHub\crossdomain.htm" />
     <Content Include="Hubs\DemoHub\Default.aspx" />
     <Content Include="Hubs\DemoHub\DemoHub.js" />
@@ -313,6 +314,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Test\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.AspNet.SignalR.Core\Microsoft.AspNet.SignalR.Core.csproj">

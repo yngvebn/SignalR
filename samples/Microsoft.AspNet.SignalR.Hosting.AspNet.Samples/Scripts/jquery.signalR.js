@@ -421,7 +421,6 @@
                     // after res.DisconnectTimeout seconds.
                     connection.disconnectTimeout = res.DisconnectTimeout * 1000; // in ms
                     
-
                     // If we have a keep alive
                     if (res.KeepAliveTimeout) {
                         // Register the keep alive data as activated
@@ -1944,14 +1943,14 @@
                 proxy = this.proxies[hubName];
 
                 if (!(proxy._.callbackMap[eventName])) {
-                    $(proxy).triggerHandler(makeEventName("methodnotfound"), [[eventName]]);
+                    $(proxy).triggerHandler(makeEventName("methodmissing"), [[eventName]]);
                 }
 
                 else {
                     // Update the hub state
                     $.extend(proxy.state, data.State);
                     $(proxy).triggerHandler(makeEventName(eventName), [data.Args]);
-                    $(proxy).triggerHandler(makeEventName("methodexecuted"), [[eventName]]);
+                    $(proxy).triggerHandler(makeEventName("methodany"), [[eventName]]);
                 }
             }
         });

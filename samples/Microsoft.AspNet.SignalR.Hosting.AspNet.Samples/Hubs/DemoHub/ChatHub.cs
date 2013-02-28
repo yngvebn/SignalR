@@ -8,6 +8,7 @@ using Microsoft.AspNet.SignalR.Hubs;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.AspNet.SignalR.Json;
+using System.Diagnostics;
 
 namespace Microsoft.AspNet.SignalR.Samples.Hubs.DemoHub
 {
@@ -25,10 +26,11 @@ namespace Microsoft.AspNet.SignalR.Samples.Hubs.DemoHub
         public void Send(string message)
         {
             // Call the broadcastMessage method to update clients.
-            foreach (string roomName in _userRooms[Clients.Caller.userName])
+            /*foreach (string roomName in _userRooms[Clients.Caller.userName])
             {
                 Clients.OthersInGroup(Clients.Caller.roomName).broadcastMessage(String.Format(" {0} : {1}", Clients.Caller.userName, message));
-            }
+            }*/
+            Clients.All.broadcastMessage(message);
         }
 
         public Task AddUser(string userName)
@@ -48,12 +50,14 @@ namespace Microsoft.AspNet.SignalR.Samples.Hubs.DemoHub
 
         public override Task OnMethodMissing(string methodName, IJsonValue[] parameters)
         {
+            // Debug.WriteLine(String.Format("Method {0} is not defined on the Hub", methodName));
             return Clients.Caller.broadcastMessage(String.Format("Method {0} is not defined on the Hub", methodName));
         }
 
         public override Task OnMethodExecuted(string methodName, IJsonValue[] parameters)
         {
-            return Clients.Caller.broadcastMessage(String.Format("Method {0} was just executed on the Hub", methodName));
+            // Debug.WriteLine(String.Format("Method {0} was executed on the Hub", methodName));        
+            return Clients.Caller.broadcastMessage1(String.Format("Method {0} was executed on the Hub", methodName));
         }
 
         [Serializable]

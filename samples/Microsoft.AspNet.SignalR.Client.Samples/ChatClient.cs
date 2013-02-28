@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR.Client.Hubs;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNet.SignalR.Client.Samples
 {
@@ -21,9 +23,9 @@ namespace Microsoft.AspNet.SignalR.Client.Samples
 
             chatHub.On("broadcastMessage", message => Console.WriteLine(message));
 
-            chatHub.OnX<string>("!", methodName => Console.WriteLine(String.Format("Method {0} not found on the client", methodName)));
-
-            chatHub.OnX<string>("*", methodName => Console.WriteLine(String.Format("Method {0} was just executed on the client", methodName)));
+            chatHub.OnMissing<string>(methodName => Debug.WriteLine(String.Format("Client method {0} not found", methodName)));
+            
+            chatHub.OnAny<string>(methodName => Debug.WriteLine(String.Format("Client method {0} executed", methodName)));
 
             connection.Start().Wait();
 
@@ -31,7 +33,7 @@ namespace Microsoft.AspNet.SignalR.Client.Samples
 
             Console.Write("Enter your Name : ");
             userName = Console.ReadLine();
-            chatHub.Invoke("AddUser1", userName).Wait();
+            chatHub.Invoke("AddUser", userName).Wait();
 
             Thread.Sleep(2 * 1000);
 

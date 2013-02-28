@@ -34,7 +34,24 @@ namespace Microsoft.AspNet.SignalR
                 throw new ArgumentNullException("pipeline");
             }
 
-            pipeline.AddModule(new PayloadCompressionModule(GlobalHost.DependencyResolver.Resolve<IPayloadCompressor>(), GlobalHost.DependencyResolver.Resolve<IPayloadDescriptorProvider>()));
+            var resolver = GlobalHost.DependencyResolver;
+
+            var payloadDescriptorProvider = new Lazy<ReflectedPayloadDescriptorProvider>(() => new ReflectedPayloadDescriptorProvider(resolver));
+            resolver.Register(typeof(IPayloadDescriptorProvider), () => payloadDescriptorProvider.Value);
+
+            var payloadCompressor = new Lazy<DefaultPayloadCompressor>(() => new DefaultPayloadCompressor(resolver));
+            resolver.Register(typeof(IPayloadCompressor), () => payloadCompressor.Value);
+
+            var payloadDecompressor = new Lazy<DefaultPayloadDecompressor>(() => new DefaultPayloadDecompressor(resolver));
+            resolver.Register(typeof(IPayloadDecompressor), () => payloadDecompressor.Value);
+
+            var contractGenerator = new Lazy<DefaultContractsGenerator>(() => new DefaultContractsGenerator(resolver));
+            resolver.Register(typeof(IContractsGenerator), () => contractGenerator.Value);
+
+            var parameterBinder = new Lazy<CompressableParameterResolver>(() => new CompressableParameterResolver(payloadDescriptorProvider.Value, payloadDecompressor.Value));
+            resolver.Register(typeof(IParameterResolver), () => parameterBinder.Value);
+
+            pipeline.AddModule(new PayloadCompressionModule(resolver.Resolve<IPayloadCompressor>(), resolver.Resolve<IPayloadDescriptorProvider>()));
         }
     }
 }

@@ -38,12 +38,24 @@ namespace Microsoft.AspNet.SignalR.Compression
         {
             return base.BuildOutgoing((context) => {
                 var args = context.Invocation.Args;
-                long[] contracts = new long[args.Length];
+                string[] contracts = new string[args.Length];
 
                 for(var i = 0; i < args.Length; i++)
                 {
                     long contractId = -1;
-                    var descriptor = _provider.GetPayload(args[i].GetType());
+                    bool enumerable = false;
+                    Type argType = args[i].GetType();
+                    PayloadDescriptor descriptor;
+
+                    if (argType.IsEnumerable())
+                    {
+                        enumerable = true;
+                        descriptor = _provider.GetPayload(argType.GetEnumerableType());
+                    }
+                    else
+                    {
+                        descriptor = _provider.GetPayload(args[i].GetType());
+                    }
 
                     // If there's a descriptor for the given arg we can compress it
                     if (descriptor != null)
@@ -51,8 +63,13 @@ namespace Microsoft.AspNet.SignalR.Compression
                         args[i] = _compressor.Compress(args[i]);
                         contractId = descriptor.ID;
                     }
+                    else
+                    {
+                        // Don't want to send down any unnecessary data even if the current object is enumerable
+                        enumerable = false;
+                    }
 
-                    contracts[i] = contractId;
+                    contracts[i] = (enumerable) ? contractId.ToString() + "[]" : contractId.ToString();
                 }
 
                 context.Invocation.Args = args;

@@ -443,7 +443,7 @@ namespace Microsoft.AspNet.SignalR
                 DisconnectTimeout = _configurationManager.DisconnectTimeout.TotalSeconds,
                 TryWebSockets = _transportManager.SupportsTransport(WebSocketsTransportName) && context.SupportsWebSockets(),
                 WebSocketServerUrl = context.WebSocketServerUrl(),
-                Contracts = ContractsGenerator.GenerateContracts(),
+                Contracts = ContractsGenerator != null ? ContractsGenerator.GenerateContracts() : null,
                 ProtocolVersion = "1.2"
             };
 

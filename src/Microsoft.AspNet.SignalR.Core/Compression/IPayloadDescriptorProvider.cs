@@ -28,5 +28,12 @@ namespace Microsoft.AspNet.SignalR.Compression
         /// <param name="type">The type to investigate</param>
         /// <returns>Whether the type is a payload type or not</returns>
         bool IsPayload(Type type);
+
+        /// <summary>
+        /// Determines if a type has a payload within it
+        /// </summary>
+        /// <param name="type">The type to investigate</param>
+        /// <returns>Whether the type has a payload type or not</returns>
+        bool HasPayload(Type type);
     }
 }

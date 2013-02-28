@@ -55,7 +55,11 @@
     <Compile Include="..\Microsoft.AspNet.SignalR.Client\Infrastructure\StreamExtensions.cs">
       <Link>Infrastructure\StreamExtensions.cs</Link>
     </Compile>
+    <Compile Include="Compression\CompressableParameterResolver.cs" />
     <Compile Include="Compression\ContractedClientHubInvocation.cs" />
+    <Compile Include="Compression\DefaultPayloadDecompressor.cs" />
+    <Compile Include="Compression\IPayloadDecompressor.cs" />
+    <Compile Include="Compression\TypeExtensions.cs" />
     <Compile Include="Configuration\ConfigurationExtensions.cs" />
     <Compile Include="ConnectionConfiguration.cs" />
     <Compile Include="Compression\DefaultContractsGenerator.cs" />

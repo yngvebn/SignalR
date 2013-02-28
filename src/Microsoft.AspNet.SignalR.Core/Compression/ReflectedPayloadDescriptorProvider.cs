@@ -41,6 +41,7 @@ namespace Microsoft.AspNet.SignalR.Compression
                                 {
                                     Name = propertyInfo.Name,
                                     Type = propertyInfo.PropertyType,
+                                    Enumerable = propertyInfo.PropertyType.IsEnumerable(),
                                     SetValue = (baseObject, newValue) =>
                                     {
                                         propertyInfo.SetValue(baseObject, newValue, null);
@@ -55,6 +56,7 @@ namespace Microsoft.AspNet.SignalR.Compression
                                {
                                     Name = fieldInfo.Name,
                                     Type = fieldInfo.FieldType,
+                                    Enumerable = fieldInfo.FieldType.IsEnumerable(),
                                     SetValue = (baseObject, newValue) =>
                                     {
                                         fieldInfo.SetValue(baseObject, newValue);
@@ -118,6 +120,24 @@ namespace Microsoft.AspNet.SignalR.Compression
         public bool IsPayload(Type type)
         {
             return _payloads.Value.Keys.Contains(type);
+        }
+
+        public bool HasPayload(Type type)
+        {
+            if (IsPayload(type))
+            {
+                return true;
+            }
+
+            if (type.IsEnumerable())
+            {
+                return _payloads.Value.Keys.Contains(type.GetEnumerableType());
+            }
+
+            // TODO: If we're not a payload or a collection at this point we should cycle 
+            // through the members of the type and determine if any are payloads
+
+            return false;
         }
     }
 }

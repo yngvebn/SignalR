@@ -21,7 +21,7 @@ namespace Microsoft.AspNet.SignalR.Compression
             _provider = provider;
         }
 
-        public object Compress(object payload)
+        public object Compress(object payload, CompressionSettings settings)
         {
             if (payload != null)
             {
@@ -34,7 +34,7 @@ namespace Microsoft.AspNet.SignalR.Compression
                     return payloadDescriptor.Data.Select(dataDescriptor =>
                             {
                                 // Recursively compress the object value until it's at a base type
-                                return Compress(dataDescriptor.GetValue(payload));
+                                return Compress(dataDescriptor.GetValue(payload), settings);
                             });
                 }
                 else
@@ -52,16 +52,35 @@ namespace Microsoft.AspNet.SignalR.Compression
                         {
                             foreach (var item in payloadList)
                             {
-                                compressedList.Add(Compress(item));
+                                compressedList.Add(Compress(item, payloadDescriptor.Settings));
                             }
 
                             return compressedList;
                         }
                     }
                 }
+
+                payloadType = payload.GetType();
+
+                if (settings.DigitsToMaintain >= 0 && payloadType.CanBeRounded())
+                {
+                    if (payloadType != typeof(double))
+                    {
+                        payload = Math.Round((decimal)payload, settings.DigitsToMaintain);
+                    }
+                    else
+                    {
+                        payload = Math.Round((double)payload, settings.DigitsToMaintain);
+                    }
+                }
             }
 
             return payload;
+        }
+
+        public object Compress(object payload)
+        {
+            return Compress(payload, CompressionSettings.Default);
         }
     }
 }

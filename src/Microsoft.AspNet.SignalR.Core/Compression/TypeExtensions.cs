@@ -8,7 +8,7 @@ namespace Microsoft.AspNet.SignalR.Compression
 {
     public static class TypeExtensions
     {
-        public static Boolean IsEnumerable(this Type type)
+        public static bool IsEnumerable(this Type type)
         {
             return type.GetInterfaces()
                         .Where(t => t.IsGenericType)
@@ -30,6 +30,16 @@ namespace Microsoft.AspNet.SignalR.Compression
             }
 
             return typeof(object);
+        }
+
+        public static bool CanBeRounded(this Type type)
+        {
+            if(type == typeof(double) || type == typeof(decimal))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

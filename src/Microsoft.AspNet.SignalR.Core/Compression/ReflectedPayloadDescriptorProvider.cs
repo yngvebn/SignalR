@@ -36,6 +36,10 @@ namespace Microsoft.AspNet.SignalR.Compression
                 {
                     Type = type,
                     ID = Interlocked.Increment(ref _payloadDescriptorID),
+                    Settings = new CompressionSettings
+                    {
+                        DigitsToMaintain = ((PayloadAttribute)Attribute.GetCustomAttribute(type, typeof(PayloadAttribute))).DigitsToMaintain
+                    },
                     Data = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                                .Select(propertyInfo => new DataDescriptor
                                 {

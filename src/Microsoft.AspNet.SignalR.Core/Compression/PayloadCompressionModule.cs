@@ -28,9 +28,17 @@ namespace Microsoft.AspNet.SignalR.Compression
             return base.BuildIncoming((context) =>
             {
                 var result = invoke(context);
-                var type = result.GetType();
+                var type = ((Task<object>)result).Result.GetType();
+                var descriptor = _provider.GetPayload(type) ?? ((type.IsEnumerable()) ? _provider.GetPayload(type.GetEnumerableType()) : null);
 
-                return result.Then(r => _compressor.Compress(r));
+                if (descriptor == null)
+                {
+                    return result.Then(r => _compressor.Compress(r));
+                }
+                else
+                {
+                    return result.Then(r => _compressor.Compress(r, descriptor.Settings));
+                }
             });
         }
 
@@ -60,7 +68,7 @@ namespace Microsoft.AspNet.SignalR.Compression
                     // If there's a descriptor for the given arg we can compress it
                     if (descriptor != null)
                     {
-                        args[i] = _compressor.Compress(args[i]);
+                        args[i] = _compressor.Compress(args[i], descriptor.Settings);
                         contractId = descriptor.ID;
                     }
                     else

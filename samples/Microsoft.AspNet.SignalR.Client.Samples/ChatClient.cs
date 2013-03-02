@@ -23,9 +23,26 @@ namespace Microsoft.AspNet.SignalR.Client.Samples
 
             chatHub.On("broadcastMessage", message => Console.WriteLine(message));
 
-            chatHub.OnMissing<string>(methodName => Debug.WriteLine(String.Format("Client method {0} not found", methodName)));
+            chatHub.OnMissing((args, methodName) => {
+                Console.WriteLine(String.Format("Client method {0} not found", methodName));
+                int argNum = 0;
+                foreach (JToken argument in args)
+                {
+                    Console.WriteLine(String.Format("Argument {0} is: {1} ", argNum++, argument.ToObject<string>()));
+                }
+            });
             
-            chatHub.OnAny<string>(methodName => Debug.WriteLine(String.Format("Client method {0} executed", methodName)));
+            //chatHub.OnMissing<<IList<JToken>,string>(methodName => Debug.WriteLine(String.Format("Client method {0} not found", methodName)));
+
+            chatHub.OnAny((args, methodName) =>
+                {
+                    Console.WriteLine(String.Format("Client method {0} executed", methodName));
+                    int argNum = 0;
+                    foreach (JToken argument in args)
+                    {
+                        Console.WriteLine(String.Format("Argument {0} is: {1} ", argNum++, argument.ToObject<string>()));
+                    }
+                });
 
             connection.Start().Wait();
 

@@ -41,7 +41,7 @@ namespace Microsoft.AspNet.SignalR.Client.Hubs
         /// <param name="proxy">The <see cref="IHubProxy"/>.</param>
         /// <param name="onData">The callback</param>
         /// <returns>An <see cref="IDisposable"/> that represents this subscription.</returns>
-        public static IDisposable OnAny<T>(this IHubProxy proxy, Action<T> onData)
+        public static IDisposable OnAny(this IHubProxy proxy, Action<IList<JToken>, string> onData)
         {
             if (proxy == null)
             {
@@ -57,7 +57,7 @@ namespace Microsoft.AspNet.SignalR.Client.Hubs
 
             Action<IList<JToken>, string> handler = (args, methodName) =>
             {
-                onData(Convert<T>(methodName));
+                onData(args, methodName);
             };
 
             subscription.ReceivedDefault += handler;
@@ -72,7 +72,7 @@ namespace Microsoft.AspNet.SignalR.Client.Hubs
         /// <param name="proxy">The <see cref="IHubProxy"/>.</param>
         /// <param name="onData">The callback</param>
         /// <returns>An <see cref="IDisposable"/> that represents this subscription.</returns>
-        public static IDisposable OnMissing<string>(this IHubProxy proxy, Action<string> onData)
+        public static IDisposable OnMissing(this IHubProxy proxy, Action<IList<JToken>, string> onData)
         {
             if (proxy == null)
             {
@@ -88,11 +88,11 @@ namespace Microsoft.AspNet.SignalR.Client.Hubs
 
             Action<IList<JToken>, string> handler = (args, methodName) =>
             {
-                onData(Convert<string>(methodName));
+                onData(args, methodName);
             };
 
             subscription.ReceivedDefault += handler;
-            // proxy._subscriptionMethodMissing.Received += handler;
+            // proxy._subscriptionAny.Received += handler;
 
             return new DisposableAction(() => subscription.ReceivedDefault -= handler);
         }

@@ -130,6 +130,11 @@
             /// <summary>Calls the Send method on the server-side ChatHub hub.&#10;Returns a jQuery.Deferred() promise.</summary>
             /// <param name=\"message\" type=\"String\">Server side type is System.String</param>
                 return proxies.chatHub.invoke.apply(proxies.chatHub, $.merge(["Send"], $.makeArray(arguments)));
+             },
+
+            updateData: function () {
+            /// <summary>Calls the UpdateData method on the server-side ChatHub hub.&#10;Returns a jQuery.Deferred() promise.</summary>
+                return proxies.chatHub.invoke.apply(proxies.chatHub, $.merge(["UpdateData"], $.makeArray(arguments)));
              }
         };
 

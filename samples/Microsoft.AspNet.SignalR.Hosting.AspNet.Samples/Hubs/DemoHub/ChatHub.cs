@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.AspNet.SignalR.Json;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Microsoft.AspNet.SignalR.Samples.Hubs.DemoHub
 {
@@ -23,6 +24,8 @@ namespace Microsoft.AspNet.SignalR.Samples.Hubs.DemoHub
         // Room names mapped to romm objects
         private static readonly ConcurrentDictionary<string, ChatRoom> _rooms = new ConcurrentDictionary<string, ChatRoom>(StringComparer.OrdinalIgnoreCase);
 
+        private int count = 0;
+
         public void Send(string message)
         {
             // Call the broadcastMessage method to update clients.
@@ -30,7 +33,7 @@ namespace Microsoft.AspNet.SignalR.Samples.Hubs.DemoHub
             {
                 Clients.OthersInGroup(Clients.Caller.roomName).broadcastMessage(String.Format(" {0} : {1}", Clients.Caller.userName, message));
             }*/
-            Clients.All.broadcastMessage(message);
+            Clients.All.broadcastMessage(message, "abhi");
         }
 
         public Task AddUser(string userName)
@@ -40,6 +43,18 @@ namespace Microsoft.AspNet.SignalR.Samples.Hubs.DemoHub
             Clients.Caller.userName = user.Name;
             Clients.Caller.userId = user.Id;
             return Clients.All.broadcastMessage(String.Format("New user {0} has joined", user.Name));
+        }
+
+        public void UpdateData()
+        {
+            Clients.Caller.updateData(count++);
+        }
+
+        public override Task OnConnected()
+        {
+            Timer _timer;
+            _timer = new Timer(_ => UpdateData(), state: null, dueTime: 0, period: 10000);
+            return Clients.All.broadcastMessage("Connected");
         }
 
         public override Task OnDisconnected()

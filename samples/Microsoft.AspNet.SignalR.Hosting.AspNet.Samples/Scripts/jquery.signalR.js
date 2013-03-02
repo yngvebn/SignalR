@@ -421,6 +421,7 @@
                     // after res.DisconnectTimeout seconds.
                     connection.disconnectTimeout = res.DisconnectTimeout * 1000; // in ms
                     
+
                     // If we have a keep alive
                     if (res.KeepAliveTimeout) {
                         // Register the keep alive data as activated
@@ -1912,7 +1913,7 @@
 
         // Wire up the received handler
         connection.received(function (minData) {
-            var data, proxy, dataCallbackId, callback, hubName, eventName;
+            var data, proxy, dataCallbackId, callback, hubName, eventName, temp1;
             if (!minData) {
                 return;
             }
@@ -1940,17 +1941,19 @@
                 eventName = data.Method.toLowerCase();
 
                 // Trigger the local invocation event
-                proxy = this.proxies[hubName];
+                proxy = this.proxies[hubName];              
+
+                temp1 = [eventName].concat(data.Args);
 
                 if (!(proxy._.callbackMap[eventName])) {
-                    $(proxy).triggerHandler(makeEventName("methodmissing"), [[eventName]]);
+                    $(proxy).triggerHandler(makeEventName("methodmissing"), [[[eventName].concat(data.Args)]]);
                 }
 
                 else {
                     // Update the hub state
                     $.extend(proxy.state, data.State);
                     $(proxy).triggerHandler(makeEventName(eventName), [data.Args]);
-                    $(proxy).triggerHandler(makeEventName("methodany"), [[eventName]]);
+                    $(proxy).triggerHandler(makeEventName("methodany"), [[[eventName].concat(data.Args)]]);
                 }
             }
         });

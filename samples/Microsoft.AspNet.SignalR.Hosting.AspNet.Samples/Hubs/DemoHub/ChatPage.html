@@ -9,9 +9,35 @@
             padding: 20px;
             margin: 20px;
         }
+
+        .hero-unit {
+            padding: 60px;
+            margin-bottom: 30px;
+            background-color: #eeeeee;
+            -webkit-border-radius: 6px;
+            -moz-border-radius: 6px;
+            border-radius: 6px;
+        }
+
+            .hero-unit h1 {
+                margin-bottom: 0;
+                font-size: 60px;
+                line-height: 1;
+                letter-spacing: -1px;
+                color: inherit;
+                text-align: center;
+            }
+
+            .hero-unit p {
+                font-size: 18px;
+                font-weight: 200;
+                line-height: 30px;
+                color: inherit;
+            }
     </style>
 </head>
 <body>
+    <!--
     <div class="container">
         <input type="text" id="message" />
         <input type="button" id="sendmessage" value="Send" />
@@ -19,6 +45,22 @@
         <ul id="discussion">
         </ul>
     </div>
+    -->
+
+    <div class="hero-unit">
+        <h1>ASP.NET SignalR Hackathon</h1>
+    </div>
+
+    <div class="container">
+        <p id="para1">
+        </p>
+    </div>
+
+    <div class="container">
+        <p id="para2">
+        </p>
+    </div>
+
     <!--Script references. -->
     <!--Reference the jQuery library. -->
     <script src="../../Scripts/jquery-1.8.2.min.js"></script>
@@ -26,37 +68,50 @@
     <script src="../../Scripts/jquery.signalR.js"></script>
     <script src="/signalr/hubs"></script>
     <!--Add script to update the page and send messages.-->
+    <script src="UserEvents.js"></script>
+
     <script type="text/javascript">
+
         $(function () {
-            // alert("Hello1");
             var proxy = $.connection.chatHub;
 
             $.connection.hub.logging = true;
 
-            // proxy.state.testProp = 1;
+            var funcPipeline = {};
+
             $.connection.hub.start()
             .done(function () {
                 proxy.server.send("Hello!");
             });
-            
-            proxy.client.broadcastMessage = function (message) {
-                $("#discussion").append("<li>" + message + "</li>");
+
+            proxy.client.broadcastMessage = function (message, user) {
+                $("#discussion").append("<li>" + user + " : " + message + "</li>");
             }
 
             $("#sendmessage").click(function () {
                 var message = $("#message").val();
                 proxy.server.send(message);
-                $.connection.hub.log("Message : '"+ message + "' sent to all clients");
+                $.connection.hub.log("Message : '" + message + "' sent to all clients");
             });
 
-            proxy.client.methodMissing = function (methodName) {
+            proxy.client.methodMissing = function (args) {
                 // window.alert('Client hub method ' + eventName + ' is not defined on the client');
-                $.connection.hub.log("Client method '" + methodName + "' is not defined");
+                $.connection.hub.log("Client method '" + args[0] + "' is not defined");
+                var patt = /^(updateData)/i;
+                for (var x in window.events) {
+                    if (typeof window.events[x] === "function" && patt.test(x) === true) {
+                        window.events[x](args[1]);
+                    }
+                }
             };
 
-            proxy.client.methodAny = function (methodName) {
+            proxy.client.methodAny = function (args) {
                 // window.alert("Triggered client hub event '" + eventName);
-                $.connection.hub.log("Client method '" + methodName + "' executed");
+                var arguments = "";
+                for (i = 1; i < args.length; i++) {
+                    arguments += " '" + args[i] + "',";
+                }
+                $.connection.hub.log("Client method '" + args[0] + "' executed with the arguments: " + arguments);
             };
         });
     </script>

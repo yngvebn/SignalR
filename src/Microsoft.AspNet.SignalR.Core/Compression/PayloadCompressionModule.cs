@@ -27,17 +27,23 @@ namespace Microsoft.AspNet.SignalR.Compression
         {
             return base.BuildIncoming((context) =>
             {
-                var result = invoke(context);
-                var type = ((Task<object>)result).Result.GetType();
-                var descriptor = _provider.GetPayload(type) ?? ((type.IsEnumerable()) ? _provider.GetPayload(type.GetEnumerableType()) : null);
+                var taskResult = invoke(context);
+                var result = ((Task<object>)taskResult).Result;
+                PayloadDescriptor descriptor = null;
+
+                if (result != null)
+                {
+                    var type = result.GetType();
+                    descriptor = _provider.GetPayload(type) ?? ((type.IsEnumerable()) ? _provider.GetPayload(type.GetEnumerableType()) : null);
+                }
 
                 if (descriptor == null)
                 {
-                    return result.Then(r => _compressor.Compress(r));
+                    return taskResult.Then(r => _compressor.Compress(r));
                 }
                 else
                 {
-                    return result.Then(r => _compressor.Compress(r, descriptor.Settings));
+                    return taskResult.Then(r => _compressor.Compress(r, descriptor.Settings));
                 }
             });
         }

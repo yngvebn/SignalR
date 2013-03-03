@@ -2045,11 +2045,11 @@
                     if (isPayload(compressedTypeId, contracts)) {
                         if (enumerable) {
                             enumerated = [];
-                            
+
                             for (var j = 0; j < compressed[i].length; j++) {
                                 enumerated[j] = decompress(compressed[i][j], getContract(compressedTypeId, contracts), contracts);
                             }
-                            
+
                             result[propertyName] = enumerated;
                         }
                         else {
@@ -2154,7 +2154,7 @@
                     minData.R = result;
                 }
             }
-            else if (typeof (minData.A) !== "undefined") {
+            else if (typeof (minData.A) !== "undefined" && typeof(minData.C) !== "undefined") {
                 $.each(minData.A, function (i, arg) {
                     var contractId = minData.C[i],
                         contract,
@@ -2201,49 +2201,52 @@
 
         proxy.invoke = function (methodName) {
             var contracts = compressionData.contracts,
-                returnContracts = contracts[0][hubName],
-                invokeContracts = contracts[1][hubName],
-                invokeContractData,
-                contractId,
-                contract,
-                enumerable,
-                enumerated,
                 methodArgs = $.makeArray(arguments);
 
-            // Check if we need to return a result
-            if (returnContracts && returnContracts[methodName]) {
-                compressionData.decompressResult.push(buildResult(hubName, methodName, true));
-            }
-            else {
-                compressionData.decompressResult.push(buildResult(hubName, methodName, false));
-            }
+            if (contracts) {
+                var returnContracts = contracts[0][hubName],
+                    invokeContracts = contracts[1][hubName],
+                    invokeContractData,
+                    contractId,
+                    contract,
+                    enumerable,
+                    enumerated;
 
-            if (invokeContracts && invokeContracts[methodName]) {
-                invokeContractData = invokeContracts[methodName];
 
-                for (var i = 1; i < methodArgs.length; i++) {
-                    contractId = invokeContractData[i - 1][0];
-                    enumerable = invokeContractData[i - 1][1];                    
+                // Check if we need to return a result
+                if (returnContracts && returnContracts[methodName]) {
+                    compressionData.decompressResult.push(buildResult(hubName, methodName, true));
+                }
+                else {
+                    compressionData.decompressResult.push(buildResult(hubName, methodName, false));
+                }
 
-                    if (isPayload(contractId, contracts)) {
-                        contract = getContract(contractId, contracts);
+                if (invokeContracts && invokeContracts[methodName]) {
+                    invokeContractData = invokeContracts[methodName];
 
-                        if (enumerable) {
-                            enumerated = [];
+                    for (var i = 1; i < methodArgs.length; i++) {
+                        contractId = invokeContractData[i - 1][0];
+                        enumerable = invokeContractData[i - 1][1];
 
-                            for(var j = 0;j<methodArgs[i].length;j++) {
-                                enumerated.push(compress(methodArgs[i][j], contract, contracts));
+                        if (isPayload(contractId, contracts)) {
+                            contract = getContract(contractId, contracts);
+
+                            if (enumerable) {
+                                enumerated = [];
+
+                                for (var j = 0; j < methodArgs[i].length; j++) {
+                                    enumerated.push(compress(methodArgs[i][j], contract, contracts));
+                                }
+
+                                methodArgs[i] = enumerated;
                             }
-
-                            methodArgs[i] = enumerated;
-                        }
-                        else {
-                            methodArgs[i] = compress(methodArgs[i], contract, contracts);
+                            else {
+                                methodArgs[i] = compress(methodArgs[i], contract, contracts);
+                            }
                         }
                     }
                 }
             }
-
             return savedInvoke.apply(this, methodArgs);
         };
 

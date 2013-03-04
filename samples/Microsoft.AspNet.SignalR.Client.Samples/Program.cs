@@ -125,7 +125,6 @@ namespace Microsoft.AspNet.SignalR.Client.Samples
                 try
                 {
                     task.Wait();
-
                     Console.WriteLine("Using {0}", connection.Transport.Name);
                 }
                 catch (Exception ex)
@@ -147,7 +146,6 @@ namespace Microsoft.AspNet.SignalR.Client.Samples
 
                 wh.Set();
             });
-
             wh.WaitOne();
         }
 

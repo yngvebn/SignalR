@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.SignalR.Samples.Hubs.DemoHub
         // Room names mapped to romm objects
         private static readonly ConcurrentDictionary<string, ChatRoom> _rooms = new ConcurrentDictionary<string, ChatRoom>(StringComparer.OrdinalIgnoreCase);
 
-        private int count = 0;
+        private int emailCount = 0, numUsers = 10;
 
         public void Send(string message)
         {
@@ -47,32 +47,35 @@ namespace Microsoft.AspNet.SignalR.Samples.Hubs.DemoHub
 
         public void UpdateData()
         {
-            Clients.Caller.updateData(count++);
+            Clients.Caller.updateEmail(emailCount++ + " new message(s)");
+            Clients.Caller.updateUsers(numUsers++ + " people are online");
         }
 
         public override Task OnConnected()
         {
             Timer _timer;
             _timer = new Timer(_ => UpdateData(), state: null, dueTime: 0, period: 10000);
-            return Clients.All.broadcastMessage("Connected");
+            return base.OnConnected();
         }
 
         public override Task OnDisconnected()
         {
             // string groupName = Clients.Caller.groupName;
-            return Clients.Others.broadcastMessage(String.Format("Client {0} has left the chat room", "left"));
+            return base.OnDisconnected();
+            // return Clients.Others.broadcastMessage(String.Format("Client {0} has left the chat room", "left"));
         }
 
         public override Task OnMethodMissing(string methodName, IJsonValue[] parameters)
         {
+            return Task.Factory.StartNew(() => Debug.WriteLine(String.Format("Method {0} is not defined on the Hub", methodName)));        
             // Debug.WriteLine(String.Format("Method {0} is not defined on the Hub", methodName));
-            return Clients.Caller.broadcastMessage(String.Format("Method {0} is not defined on the Hub", methodName));
+            // return Clients.Caller.broadcastMessage(String.Format("Method {0} is not defined on the Hub", methodName));
         }
 
         public override Task OnMethodExecuted(string methodName, IJsonValue[] parameters)
         {
-            // Debug.WriteLine(String.Format("Method {0} was executed on the Hub", methodName));        
-            return Clients.Caller.broadcastMessage1(String.Format("Method {0} was executed on the Hub", methodName));
+            return Task.Factory.StartNew(() => Debug.WriteLine(String.Format("Method {0} was executed on the Hub", methodName)));        
+            // return Clients.Caller.broadcastMessage1(String.Format("Method {0} was executed on the Hub", methodName));
         }
 
         [Serializable]

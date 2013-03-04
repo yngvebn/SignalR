@@ -1,13 +1,24 @@
 ﻿<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>SignalR Simple Chat</title>
+    <title>SignalR </title>
     <style type="text/css">
         .container {
             background-color: #99CCFF;
             border: thick solid #808080;
             padding: 20px;
             margin: 20px;
+            width: 300px;
+            float: left;
+        }
+
+        .containerRight {
+            background-color: #99CCFF;
+            border: thick solid #808080;
+            padding: 20px;
+            margin: 20px;
+            width: 300px;
+            float: right;
         }
 
         .hero-unit {
@@ -21,7 +32,7 @@
 
             .hero-unit h1 {
                 margin-bottom: 0;
-                font-size: 60px;
+                font-size: 40px;
                 line-height: 1;
                 letter-spacing: -1px;
                 color: inherit;
@@ -56,7 +67,7 @@
         </p>
     </div>
 
-    <div class="container">
+    <div class="containerRight">
         <p id="para2">
         </p>
     </div>
@@ -97,10 +108,16 @@
             proxy.client.methodMissing = function (args) {
                 // window.alert('Client hub method ' + eventName + ' is not defined on the client');
                 $.connection.hub.log("Client method '" + args[0] + "' is not defined");
-                var patt = /^(updateData)/i;
+                var pattEmail = /^(updateEmail)/i;
+                var pattUsers = /^(updateUsers)/i;
                 for (var x in window.events) {
-                    if (typeof window.events[x] === "function" && patt.test(x) === true) {
-                        window.events[x](args[1]);
+                    if (typeof window.events[x] === "function") {
+                        if (pattEmail.test(args[0]) === true && pattEmail.test(x) === true) {
+                            window.events[x](args[1]);
+                        }
+                        else if (pattUsers.test(args[0]) === true && pattUsers.test(x) === true) {
+                            window.events[x](args[1]);
+                        }
                     }
                 }
             };

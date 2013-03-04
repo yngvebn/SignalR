@@ -23,31 +23,33 @@ namespace Microsoft.AspNet.SignalR.Client.Samples
 
             chatHub.On("broadcastMessage", message => Console.WriteLine(message));
 
-            chatHub.OnMissing((args, methodName) => {
-                Console.WriteLine(String.Format("Client method {0} not found", methodName));
-                int argNum = 0;
+            chatHub.OnMissing((args, methodName) =>
+            {
+                string argList = "";
                 foreach (JToken argument in args)
                 {
-                    Console.WriteLine(String.Format("Argument {0} is: {1} ", argNum++, argument.ToObject<string>()));
+                    argList += argument.ToObject<string>() + ", ";
                 }
+                Debug.WriteLine(String.Format("Client method '{0}' not defined on the client", methodName));
             });
-            
+
             //chatHub.OnMissing<<IList<JToken>,string>(methodName => Debug.WriteLine(String.Format("Client method {0} not found", methodName)));
 
             chatHub.OnAny((args, methodName) =>
+            {
+                string argList = "";
+                foreach (JToken argument in args)
                 {
-                    Console.WriteLine(String.Format("Client method {0} executed", methodName));
-                    int argNum = 0;
-                    foreach (JToken argument in args)
-                    {
-                        Console.WriteLine(String.Format("Argument {0} is: {1} ", argNum++, argument.ToObject<string>()));
-                    }
-                });
+                    argList += argument.ToObject<string>() + ", ";
+                }
+                Debug.WriteLine(String.Format("Client method '{0}' executed with the arguments : {1}", methodName, argList));
+            });
 
             connection.Start().Wait();
-
+            Thread.Sleep(2 * 1000);
             string line = null;
 
+            // Console.ReadLine();
             Console.Write("Enter your Name : ");
             userName = Console.ReadLine();
             chatHub.Invoke("AddUser", userName).Wait();

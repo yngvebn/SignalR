@@ -25,3 +25,4 @@ QUnit.test("Changing State", function () {
     // Reset the connection state back to disconnected
     con.changeState(con.fn, con.connectionState.connected, con.connectionState.disconnected);
 });
+

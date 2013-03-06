@@ -3,6 +3,7 @@ using System.Security.Principal;
 using System.Web.Routing;
 using System.Web.Security;
 using Microsoft.AspNet.SignalR.Samples;
+using Microsoft.AspNet.SignalR.Samples.Hubs.DemoHub;
 
 namespace Microsoft.AspNet.SignalR.Samples
 {
@@ -12,6 +13,7 @@ namespace Microsoft.AspNet.SignalR.Samples
         {
             SignalRConfig.ConfigureSignalR(GlobalHost.DependencyResolver, GlobalHost.HubPipeline);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
+            RouteTable.Routes.MapConnection<ChatServer>("chatservice", "/chat");
             BackgroundThread.Start();
         }
 

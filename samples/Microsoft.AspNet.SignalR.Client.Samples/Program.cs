@@ -18,7 +18,10 @@ namespace Microsoft.AspNet.SignalR.Client.Samples
 
             // RunDemoHub(hubConnection);
 
-            RunStreamingSample();
+            // RunStreamingSample();
+
+            var chatClient = new ChatClientPC();
+            chatClient.Start();
 
             Console.ReadKey();
         }

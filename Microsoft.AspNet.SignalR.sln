@@ -34,6 +34,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNet.SignalR.Ho
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNet.SignalR.Client.Samples", "samples\Microsoft.AspNet.SignalR.Client.Samples\Microsoft.AspNet.SignalR.Client.Samples.csproj", "{E0223FDC-0982-4D80-B6C2-BFAA6C6748C5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1EA34A62-E03E-45CF-A9C9-82D2DA0FCD82} = {1EA34A62-E03E-45CF-A9C9-82D2DA0FCD82}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{08B794D9-FF1D-4536-885A-51892934A1F4}"
 	ProjectSection(SolutionItems) = preProject

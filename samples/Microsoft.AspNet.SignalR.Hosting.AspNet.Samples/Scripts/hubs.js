@@ -117,6 +117,28 @@
              }
         };
 
+        proxies.chatHub = this.createHubProxy('chatHub'); 
+        proxies.chatHub.client = { };
+        proxies.chatHub.server = {
+            addUser: function (userName) {
+            /// <summary>Calls the AddUser method on the server-side ChatHub hub.&#10;Returns a jQuery.Deferred() promise.</summary>
+            /// <param name=\"userName\" type=\"String\">Server side type is System.String</param>
+                return proxies.chatHub.invoke.apply(proxies.chatHub, $.merge(["AddUser"], $.makeArray(arguments)));
+             },
+
+            join: function (roomName) {
+            /// <summary>Calls the Join method on the server-side ChatHub hub.&#10;Returns a jQuery.Deferred() promise.</summary>
+            /// <param name=\"roomName\" type=\"String\">Server side type is System.String</param>
+                return proxies.chatHub.invoke.apply(proxies.chatHub, $.merge(["Join"], $.makeArray(arguments)));
+             },
+
+            send: function (message) {
+            /// <summary>Calls the Send method on the server-side ChatHub hub.&#10;Returns a jQuery.Deferred() promise.</summary>
+            /// <param name=\"message\" type=\"String\">Server side type is System.String</param>
+                return proxies.chatHub.invoke.apply(proxies.chatHub, $.merge(["Send"], $.makeArray(arguments)));
+             }
+        };
+
         proxies.demo = this.createHubProxy('demo'); 
         proxies.demo.client = { };
         proxies.demo.server = {

@@ -22,8 +22,8 @@ namespace Microsoft.AspNet.SignalR.Samples
         protected override Task OnReceived(IRequest request, string connectionId, string data)
         {
             Debug.WriteLine(data);
-            return Groups.Send("foo", data);
-            // return this.Connection.Send(null, "Hello");
+            //return Groups.Send("foo", data);
+            return this.Connection.Send(null, "Hello");
         }
 
         protected override Task OnDisconnected(IRequest request, string connectionId)

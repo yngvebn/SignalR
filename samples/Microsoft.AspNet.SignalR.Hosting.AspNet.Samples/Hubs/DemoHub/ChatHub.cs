@@ -36,8 +36,8 @@ namespace Microsoft.AspNet.SignalR.Client.Samples
             _users.TryAdd(userName, user);
             Clients.Caller.userName = user.Name;
             Clients.Caller.userId = user.Id;
-            return Clients.Group("foo").broadcastMessage(userName);
-            // return Clients.Client(null).broadcastMessage(userName);
+            // return Clients.Group("foo").broadcastMessage(userName);
+            return Clients.Client(null).broadcastMessage(userName);
             //return Clients.All.broadcastMessage(String.Format("New user {0} has joined", user.Name));
         }
 

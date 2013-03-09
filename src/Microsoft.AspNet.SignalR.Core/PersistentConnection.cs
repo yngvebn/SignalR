@@ -425,7 +425,8 @@ namespace Microsoft.AspNet.SignalR
 
         protected Task ProcessNegotiationRequest(HostContext context)
         {
-            var response = BuildNegotiateResponse(context);
+            var response = new Dictionary<string, object>();
+            BuildNegotiateResponse(context, response);
 
             if (!String.IsNullOrEmpty(context.Request.QueryString["callback"]))
             {
@@ -436,12 +437,7 @@ namespace Microsoft.AspNet.SignalR
             return context.Response.End(JsonSerializer.Stringify(response));
         }
 
-        protected virtual Dictionary<string, object> BuildNegotiateResponse(HostContext context)
-        {
-            return BuildNegotiateResponse(context, new Dictionary<string, object>());
-        }
-
-        protected Dictionary<string, object> BuildNegotiateResponse(HostContext context, Dictionary<string, object> response)
+        protected virtual void BuildNegotiateResponse(HostContext context, Dictionary<string, object> response)
         {
             // Total amount of time without a keep alive before the client should attempt to reconnect in seconds.
             var keepAliveTimeout = _configurationManager.KeepAliveTimeout();
@@ -456,8 +452,6 @@ namespace Microsoft.AspNet.SignalR
             response["TryWebSockets"] = _transportManager.SupportsTransport(WebSocketsTransportName) && context.SupportsWebSockets();
             response["WebSocketServerUrl"] = context.WebSocketServerUrl();
             response["ProtocolVersion"] = "1.2";
-
-            return response;
         }
 
         private static string GetUserIdentity(HostContext context)
